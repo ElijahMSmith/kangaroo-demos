@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="./normalize.css" />
+		<link rel="stylesheet" href="./styles.css" />
+		<title>Ice Cream Shop</title>
+	</head>
+	<body>
+		<main>
+			<section>
+				<div>
+					<h3>In-Stock</h3>
+					<p id="in-stock-flavors"></p>
+					<button id="check-stock-button">Check</button>
+				</div>
+				<form id="buy-form">
+					<h3>Buy Some Ice Cream</h3>
+					<div>
+						<label for="flavor">Flavor</label>
+						<input
+							type="text"
+							name="flavor"
+							id="flavor"
+							autocomplete="false"
+						/>
+					</div>
+					<div>
+						<label for="scoops">Scoops</label>
+						<input
+							type="number"
+							name="scoops"
+							id="scoops"
+							autocomplete="false"
+						/>
+					</div>
+					<button type="submit"">Purchase</button>
+				</form>
+                <p id="status-text" style="display: none;"></p>
+			</section>
+		</main>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+            integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+            crossorigin="anonymous"
+        ></script>
+		<script>
+            function setErrorText(text) {
+                let statusText = document.getElementById("status-text");
+                statusText.textContent = text;
+                statusText.style.display = "inline";
+                statusText.style.color = "red";
+            }
+
+            function setSuccessText(text) {
+                let statusText = document.getElementById("status-text");
+                statusText.textContent = text;
+                statusText.style.display = "inline";
+                statusText.style.color = "green";
+            }
+
+            function clearStatus() {
+                let statusText = document.getElementById("status-text");
+                statusText.textContent = "";
+                statusText.style.display = "none";
+            }
+
+            async function getStock() {
+                try {
+                    const response = await axios.get('/api/stock');
+                    console.log(response.data);
+                    let res = "";
+                    for (let iceCream of response.data.iceCream) {
+                        res += `${iceCream.flavor}: ${iceCream.scoops} scoops\n`;
+                    }
+                    document.getElementById("in-stock-flavors").innerText = res;
+                } catch (error) {
+                    setErrorText(error)
+                }
+            }
+
+			document.getElementById("check-stock-button").addEventListener("click", getStock);
+
+            document.getElementById("buy-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                let elements = e.target.elements;
+                let flavor = elements["flavor"].value;
+                let scoops = Number(elements["scoops"].value);
+
+                if(scoops <= 0) {
+                    setErrorText("Invalid Scoop Count")
+                    return
+                }
+
+                console.log(flavor, scoops);
+
+                try {
+                    await axios.post('/api/stock', { 
+                        flavor,
+                        scoops,
+                     });
+
+                    setSuccessText("Purchased!")
+                    getStock();
+                } catch (error) {
+                    setErrorText(error)
+                }
+            })
+
+            getStock();
+		</script>
+	</body>
+</html>
