@@ -48,7 +48,7 @@
         ></script>
 		<script>
 
-            const authToken = "abcdefg"
+            const authToken = "1234"
 
             function setErrorText(text) {
                 let statusText = document.getElementById("status-text");
@@ -72,14 +72,14 @@
 
             async function getStock() {
                 try {
-                    const response = await axios.get('/api/stock', {
+                    const response = await axios.get('/iceCream/stock', {
                         headers: {
                             "Authorization": `Bearer ${authToken}`
                         }
                      });
                     console.log(response.data);
                     let res = "";
-                    for (let iceCream of response.data.iceCream) {
+                    for (let iceCream of response.data) {
                         res += `${iceCream.flavor}: ${iceCream.scoops} scoops\n`;
                     }
                     document.getElementById("in-stock-flavors").innerText = res;
@@ -105,7 +105,7 @@
                 console.log(flavor, scoops);
 
                 try {
-                    await axios.post('/api/stock', { 
+                    await axios.post('/iceCream/stock', { 
                         flavor,
                         scoops,
                      }, {
